@@ -8,7 +8,7 @@ extern crate find_folder;
 
 use conrod::backend::glium::glium::{self, Surface,glutin};
 use conrod::backend::glium::glium::backend::glutin::glutin::GlContext;
-use conrod::widget::{Text, Button};
+use conrod::widget::{Text, Button, Toggle};
 use conrod::{widget, Positionable, Colorable, Widget, Sizeable};
 
 fn main() {
@@ -36,6 +36,7 @@ fn main() {
     widget_ids!(struct Ids {
          text,
          button,
+         toggle,
     });
     ui.fonts.insert_from_file(font_path).unwrap();
 
@@ -43,23 +44,35 @@ fn main() {
 
     let image_map = conrod::image::Map::<glium::texture::Texture2d>::new();
     let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
-    let mut main_text = String::from("Gay, You be");
+    let mut main_text = [String::from("Gay, You be"), String::from("Am I?")];
+    let mut text_button_num = 0;
     'main: loop {
         {
             for input in ui.global_input().events(){
-                println!("{:?}", input);
+                // println!("{:?}", input);
             }
             let mut uis = &mut ui.set_widgets();
-            Text::new(&main_text)
-                .middle_of(uis.window)
-                .color(conrod::color::RED)
-                .font_size(34)
-                .set(ids.text, uis);
-            Button::new()
-                .bottom_right_of(uis.window)
-                .color(conrod::color::GREEN)
-                .w(uis.win_w / 8.0)
-                .set(ids.button, uis);
+
+            let text_button = Button::new()
+                                .bottom_right_of(uis.window)
+                                .color(conrod::color::GREEN)
+                                .w(uis.win_w / 8.0)
+                                .h((uis.win_w / 8.0)/2.0)
+                                .set(ids.button, uis);
+
+                if text_button.was_clicked(){
+                    if (&text_button_num == &1){
+                        text_button_num -= 1;
+                    }else{
+                        text_button_num += 1;
+                    }
+                }
+
+                Text::new(&main_text[text_button_num])
+                    .middle_of(uis.window)
+                    .color(conrod::color::RED)
+                    .font_size(34)
+                    .set(ids.text, uis);
 
             // Render the `Ui` and then display it on the screen.
             if let Some(primitives) = uis.draw_if_changed() {
